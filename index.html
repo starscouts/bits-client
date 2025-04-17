@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<!--suppress HtmlFormInputWithoutLabel, JSUndeclaredVariable -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bits</title>
+    <script>
+        isNodeJS = typeof require === "function";
+    </script>
+
+    <!-- Material Design -->
+    <link rel="stylesheet" href="./assets/material.css">
+    <script src="./assets/material.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./assets/global.css">
+    <link rel="stylesheet" href="./assets/black.css" id="mobile-css">
+
+    <!-- Libs -->
+    <script src="./assets/chart.js"></script>
+    <script src="./assets/trendline.js"></script>
+
+    <!-- Components -->
+    <script src="./assets/error.js"></script>
+    <script src="./assets/load.js"></script>
+    <script src="./assets/refresh.js"></script>
+    <script src="./assets/create.js"></script>
+    <script src="./assets/misc.js"></script>
+    <script src="./assets/delete.js"></script>
+    <script src="./assets/easteregg.js"></script>
+    <script src="./assets/switching.js"></script>
+    <script src="./assets/visibility.js"></script>
+    <script src="./assets/plural.js"></script>
+</head>
+<body style="position:fixed;inset:0;">
+<div id="loadfailure" style="font-family:sans-serif;position:fixed;inset:0;background:black;display:none;z-index:999999999;">
+    <div style="inset:0;position:fixed;align-items:center;justify-content: center;color:white;text-align: center;display:flex;">
+        <div style="max-width:90%;">
+            <h3>Bits failed to load</h3>
+            <p>An error occurred and Bits is unable to load at the moment. Please try again later.</p>
+        </div>
+    </div>
+</div>
+<div id="error" style="background-color:red;display:none;position:fixed;z-index:999999;color:black;font-family:monospace;inset:0;"></div>
+<div id="loader" style="background:#222;transition:opacity 500ms;z-index:9999;position:fixed;inset:0;display:flex;align-items: center;justify-content: center;">
+    <img alt="" src="assets/logo.svg" id="loader-img" style="background: linear-gradient(-90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0) 100%, var(--mdc-theme-primary) 100%, var(--mdc-theme-primary) 100%);border-radius: 999px;width:96px;">
+    <div id="loader-text" style="display:none;position:fixed;color:white;top:10px;left:0;right:0;text-align:center;">Waiting for assets...</div>
+</div>
+<script src="./assets/mobile-p1.js"></script>
+<div id="app" style="display:none;position:fixed;z-index:3;">
+    <div class="mdc-dialog mdc-plural-dialog">
+        <div class="mdc-dialog__container">
+            <div class="mdc-dialog__surface"
+                 role="alertdialog"
+                 aria-modal="true"
+                 aria-labelledby="my-dialog3-title"
+                 aria-describedby="my-dialog3-content">
+                <h2 class="mdc-dialog__title" id="my-dialog3-title">Who is using Bits today?</h2>
+                <div class="mdc-dialog__content" id="my-dialog3-content">
+                    <ul class="mdc-list mdc-list--avatar-list" style="filter:invert(1);" id="plural-members"></ul>
+                </div>
+                <div class="mdc-dialog__actions">
+                    <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="cancel">
+                        <div class="mdc-button__ripple"></div>
+                        <span class="mdc-button__label">Cancel</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="mdc-dialog__scrim"></div>
+    </div>
+
+    <header class="mdc-top-app-bar">
+        <div class="mdc-top-app-bar__row">
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-start">
+                <span class="mdc-top-app-bar__title">
+                    <span id="title-0">
+                        <span id="balance-eur">%total_eur%</span>€, £<span id="balance-gbp">%total_gbp%</span>
+                    </span>
+                    <span id="title-1" style="display:none;">
+                        Statistics
+                    </span>
+                </span>
+            </section>
+            <section class="mdc-top-app-bar__section mdc-top-app-bar__section--align-end">
+                <button class="material-symbols-outlined mdc-top-app-bar__action-item mdc-icon-button" aria-label="Toggle visibility of sensitive information" onclick="toggleVisibility()" id="visibility-icon">visibility</button>
+                <button class="material-symbols-outlined mdc-top-app-bar__action-item mdc-icon-button" aria-label="Statistics" onclick="switchToStats()" id="switcher-0">insights</button>
+                <button class="material-symbols-outlined mdc-top-app-bar__action-item mdc-icon-button" aria-label="List" onclick="switchToList()" id="switcher-1" style="display:none;">receipt_long</button>
+                <button class="material-symbols-outlined mdc-top-app-bar__action-item mdc-icon-button" aria-label="User" style="margin-right: 12px;"><img onerror="this.src='./assets/default.png'" id="user-profile" alt="" style="border-radius: 999px;width: 36px;height: 36px;vertical-align: middle;display:inline-block;position: relative;top: -5px;background: rgb(37, 37, 37);" src=""></button>
+            </section>
+        </div>
+    </header>
+    <script src="./assets/mobile-p2.js"></script>
+    <div class="mdc-touch-target-wrapper" style="position: fixed;bottom: 16px;right: 16px;z-index: 99999;">
+        <button class="mdc-fab mdc-fab--mini mdc-fab--touch" onclick="addDialog.open();" style="width: 48px;height: 48px;">
+            <div class="mdc-fab__ripple"></div>
+            <span class="material-symbols-outlined mdc-fab__icon" style="width: 32px;height: 32px;font-size: 32px;">add</span>
+            <div class="mdc-fab__touch" style="width: 64px;height: 64px;"></div>
+        </button>
+    </div>
+    <main class="mdc-top-app-bar--fixed-adjust">
+        <div class="mdc-dialog mdc-delete-dialog">
+            <div class="mdc-dialog__container">
+                <div class="mdc-dialog__surface"
+                     role="alertdialog"
+                     aria-modal="true"
+                     aria-labelledby="my-dialog-title"
+                     aria-describedby="my-dialog-content">
+                    <div class="mdc-dialog__content" id="confirm-text">
+                        Are you sure?
+                    </div>
+                    <div class="mdc-dialog__actions">
+                        <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="cancel">
+                            <div class="mdc-button__ripple"></div>
+                            <span class="mdc-button__label">Cancel</span>
+                        </button>
+                        <button type="button" class="mdc-button mdc-dialog__button" onclick='Array.from(document.querySelectorAll(".mdc-delete-dialog .mdc-dialog__actions button")).map((e) => e.disabled = true); confirmAction();'>
+                            <div class="mdc-button__ripple"></div>
+                            <span class="mdc-button__label">Delete</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mdc-dialog__scrim"></div>
+        </div>
+
+        <div class="mdc-dialog mdc-add-dialog">
+            <div class="mdc-dialog__container">
+                <div class="mdc-dialog__surface"
+                     role="alertdialog"
+                     aria-modal="true"
+                     aria-labelledby="my-dialog-title"
+                     aria-describedby="my-dialog-content">
+                    <h2 class="mdc-dialog__title" id="my-dialog-title">New transaction</h2>
+                    <div class="mdc-dialog__content" id="my-dialog-content">
+                        <label class="mdc-text-field mdc-text-field-add-amount mdc-text-field--filled">
+                            <span class="mdc-text-field__ripple"></span>
+                            <span class="mdc-floating-label" id="label-add-amount">Amount</span>
+                            <input maxlength="10" required class="mdc-text-field__input" type="text" style="-webkit-appearance: none; -moz-appearance: textfield; margin: 0;" aria-labelledby="label-add-amount" pattern="^[0-9]{0,3}(|\.[0-9]{0,2})$">
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                        <br>
+
+                        <div class="mdc-form-field mdc-form-field-add-action" style="margin-top:7px;">
+                            <div class="mdc-radio mdc-radio-add-action">
+                                <input class="mdc-radio__native-control" type="radio" id="action-add" name="radios2" checked>
+                                <div class="mdc-radio__background">
+                                    <div class="mdc-radio__outer-circle"></div>
+                                    <div class="mdc-radio__inner-circle"></div>
+                                </div>
+                                <div class="mdc-radio__ripple"></div>
+                            </div>
+                            <label for="action-add">+</label>
+                            <div class="mdc-radio mdc-radio-add-currency">
+                                <input class="mdc-radio__native-control" type="radio" id="action-remove" name="radios2">
+                                <div class="mdc-radio__background">
+                                    <div class="mdc-radio__outer-circle"></div>
+                                    <div class="mdc-radio__inner-circle"></div>
+                                </div>
+                                <div class="mdc-radio__ripple"></div>
+                            </div>
+                            <label for="action-remove">-</label>
+                        </div>
+                        <br>
+
+                        <div class="mdc-form-field mdc-form-field-add-currency" style="margin-bottom:7px;">
+                            <div class="mdc-radio mdc-radio-add-currency">
+                                <input class="mdc-radio__native-control" type="radio" id="currency-gbp" name="radios" checked>
+                                <div class="mdc-radio__background">
+                                    <div class="mdc-radio__outer-circle"></div>
+                                    <div class="mdc-radio__inner-circle"></div>
+                                </div>
+                                <div class="mdc-radio__ripple"></div>
+                            </div>
+                            <label for="currency-gbp">£</label>
+                            <div class="mdc-radio mdc-radio-add-currency">
+                                <input class="mdc-radio__native-control" type="radio" id="currency-eur" name="radios">
+                                <div class="mdc-radio__background">
+                                    <div class="mdc-radio__outer-circle"></div>
+                                    <div class="mdc-radio__inner-circle"></div>
+                                </div>
+                                <div class="mdc-radio__ripple"></div>
+                            </div>
+                            <label for="currency-eur">€</label>
+                        </div>
+                        <br>
+
+                        <label class="mdc-text-field mdc-text-field-add-description mdc-text-field--filled">
+                            <span class="mdc-text-field__ripple"></span>
+                            <span class="mdc-floating-label" id="label-add-description">Description</span>
+                            <input class="mdc-text-field__input" type="text" maxlength="100" aria-labelledby="label-add-description">
+                            <span class="mdc-line-ripple"></span>
+                        </label>
+                        <div class="mdc-text-field-helper-line">
+                            <div class="mdc-text-field-character-counter">0 / 100</div>
+                        </div>
+                    </div>
+                    <div class="mdc-dialog__actions">
+                        <button type="button" class="mdc-button mdc-dialog__button" data-mdc-dialog-action="cancel">
+                            <div class="mdc-button__ripple"></div>
+                            <span class="mdc-button__label">Cancel</span>
+                        </button>
+                        <button type="button" class="mdc-button mdc-dialog__button" onclick="newCreate();">
+                            <div class="mdc-button__ripple"></div>
+                            <span class="mdc-button__label">Create</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="mdc-dialog__scrim"></div>
+        </div>
+
+        <div id="list" style="position: fixed;top: 64px;left: 0;bottom: 0;right:0;">
+            <ul class="mdc-list mdc-list--two-line" id="transactions"></ul>
+            <ul id="demo-zone" style="display:none;">
+                <div class="transaction" data-transaction-id="%transactionId%" style="padding:10px;border-bottom: 1px solid rgba(0, 0, 0, .25);display:grid;grid-template-columns: 48px 1fr;grid-column-gap: 15px;">
+                    <div class="transaction-user" style="display:flex;align-items: center;justify-content: center;">
+                        <img onerror="this.src='./assets/default.png'" alt="%picture%" style="border-radius: 999px;width: 48px;height: 48px;">
+                    </div>
+                    <div class="transaction-details">
+                        <b>%user%</b> %type% <span style="color:var(--perc-color);"><b>%amount_bc%</b> <i>(%amount_cc%)</i></span><br>
+                        %time%<br>
+                        <div style="text-overflow: ellipsis;white-space: nowrap;overflow: hidden;width: 100%;">%description%</div>
+                    </div>
+                </div>
+                <li class="transaction mdc-list-item" data-transaction-id="%transactionId%" id="demo-transaction">
+                    <span class="mdc-list-item__ripple"></span>
+                    <span class="mdc-list-item__text">
+                        <div class="mdc-list-item__groups">
+                            <img class="mdc-list-item__picture" onerror="this.src='./assets/default.png'" alt="%picture%" style="border-radius: 999px;width: 36px;height: 36px;">
+                            <div class="mdc-list-item__contents">
+                                <span class="mdc-list-item__primary-text">%user% %type% <span style="color:var(--perc-color);filter:invert(1);"><b>%amount_bc%</b> <i>(%amount_cc%)</i></span></span>
+                                <span class="mdc-list-item__secondary-text">%time% · %description%</span>
+                            </div>
+                        </div>
+                    </span>
+                </li>
+            </ul>
+        </div>
+
+        <div id="stats" style="display:none;position:fixed;top:64px;left:0;bottom:0;right:0;overflow-x:auto;">
+            <p style="
+        font-size: 14px;
+        margin: 14px;
+        display:grid;
+        grid-template-columns: 12px 1fr;
+        grid-column-gap: 10px;
+    ">
+                <span id="graph-insights-color" style="display: inline-block;width: 12px;height: 12px;border-radius: 999px;opacity: .75;background: black;vertical-align: middle;margin-right: 5px;margin-top:3px;"></span>
+                <span id="graph-insights-text" style="
+        display: inline-block;
+        vertical-align: middle;
+    ">No insights available. Please try again later.</span>
+            </p>
+            <canvas id="graph-display" style="width:100%;height:100%;"></canvas>
+
+            <table style="margin-left:auto;margin-right:auto;margin-top:10px;width:max-content;">
+                <tr>
+                    <td style="padding-right:10px; text-align:right;"><span id="stats-goal-item">Goal</span> Date:</td>
+                    <td id="stats-goal-date">-</td>
+                </tr>
+                <tr>
+                    <td style="padding-right:10px; text-align:right;">Exchange Rate:</td>
+                    <td id="stats-exchange">-</td>
+                </tr>
+                <tr>
+                    <td style="padding-right:10px; text-align:right;">Slope:</td>
+                    <td id="stats-slope">-</td>
+                </tr>
+                <tr>
+                    <td style="padding-right:10px; text-align:right;">Chances of Holidays:</td>
+                    <td id="stats-chances-holidays">-</td>
+                </tr>
+                <tr>
+                    <td style="padding-right:10px; text-align:right;">Life Savings w/o Holidays:</td>
+                    <td id="stats-chances-living">-</td>
+                </tr>
+                <tr>
+                    <td style="padding-right:10px; text-align:right;">Life Savings w/ Holidays:</td>
+                    <td id="stats-chances-living2">-</td>
+                </tr>
+            </table>
+            <br>
+        </div>
+
+        <div id="goal" style="display:none;
+        position: fixed;
+        background: rgb(64, 64, 64);
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 10px;
+        z-index: 2;
+    "><b id="goal-name">%goal%</b> <span style="
+        float: right;
+    "><span id="goal-amount-eur">%goal_eur%</span>€, £<span id="goal-amount-gbp">%goal_gbp%</span> · <span id="goal-amount-percentage">%goal_percentage%</span>% completed</span><span id="goal-bar" style="
+        display: block;
+        height: 16px;
+        margin-top: 10px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, .25);
+    "><span id="goal-bar-fill" style="
+        height: 16px;
+        background: linear-gradient(90deg, rgba(183,153,201,1) 0%, rgba(87,58,152,1) 25%, rgba(204,129,148,1) 50%, rgba(235,186,115,1) 75%, rgba(169,83,144,1) 100%);
+        width: 0;
+        display: block;
+        border-radius: 999px;
+    "></span></span></div>
+    </main>
+</div>
+<script src="./assets/mobile-p3.js"></script>
+<script src="./assets/page.js"></script>
+<script src="./assets/graph.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+#header {
+    border-bottom: 1px solid rgba(255, 255, 255, .25) !important;
+    height: 31px !important;
+}
+
+#view {
+    background: black !important;
+    color: white !important;
+}
+
+.transaction {
+    border-bottom: 1px solid rgba(255, 255, 255, .1) !important;
+}
+
+.transaction:hover, .transaction:active, .transaction:focus {
+    background: rgba(255, 255, 255, .1) !important;
+}
+
+#goal {
+    background: black !important;
+    border-top: 1px solid rgba(255, 255, 255, .25) !important;
+}
+
+#goal-bar {
+    background: rgba(255, 255, 255, .1) !important;
+}
+
+#confirm-modal-inner > h3, #create-modal-inner > h3, #about-modal-inner > h3 {
+    background: rgba(255, 255, 255, .1);
+}
+
+#confirm-modal-inner, #create-modal-inner, #about-modal-inner {
+    color: white;
+    background: rgb(60, 60, 60) !important;
+}
